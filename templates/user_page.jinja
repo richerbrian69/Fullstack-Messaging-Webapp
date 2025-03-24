@@ -1,0 +1,262 @@
+<!-- 
+Index page, the "default" page when you visit "http://localhost/" 
+ without any URL parameters at the end
+ -->
+{% extends 'base.jinja' %}
+
+{% block content %} 
+    <style>
+        nav {
+            border-bottom: 1px solid black;
+            overflow: auto
+        }
+
+        body {
+            background-color: #DDF2D1;
+            font-family: Arial, sans-serif;
+        }
+
+        .home-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    
+        .home-button:hover {
+            background-color: #45a049;
+        }
+    
+        .forum-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    
+        .forum-button:hover {
+            background-color: #45a049;
+        }
+
+        .profile-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    
+        .profile-button:hover {
+            background-color: #45a049;
+        }
+
+        .bio-section {
+            width: 100%; /* Adjust the width as needed */
+            padding: 20px;
+            background-color: #f0f0f0; /* Light gray background */
+            border-radius: 5px;
+            margin-top: 20px;
+            float: right; /* Float bio section to the right */
+        }
+    
+        .bio-heading {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    
+        .bio-content {
+            font-size: 16px;
+        }
+    
+        .content-container {
+            width: 70%; 
+            float: left;
+        }
+        .content-container {
+            display: flex;
+        }
+        aside {
+            flex: 1; /* This will make both asides take equal space */
+            margin-right: 20px; /* Add some margin between the asides */
+        }
+    
+    </style>
+    <nav style="border-bottom: 1px solid black;">
+        <ol style="float: left">
+            <a href="{{ url_for('home', username=user.username) }}" class="home-button">Chat</a>
+        </ol>
+        <ol style="float: left">
+            <a href="{{ url_for('forum') }}" class="forum-button">Forum</a>
+        </ol>
+        <ol style="float: left">
+            <a href="{{ url_for('user_page', username=user.username) }}" class="profile-button">Profile</a>
+        </ol>
+        <ol style="float: right; text-align: right;"; >
+            <input type="text" id="search-input" placeholder="Search for user..." style="margin-right: 1px;">
+            <button onclick="searchForUser()" style="margin-right: 100px;">Search</button>
+            <li style="display:inline-block">Username:  {{ user.username }} </li>
+            <li style="display:block">Account type:  {{ user.user_type }} </li>
+            <button style="display:inline-block" onclick="confirmSignOut()"><a class="sign-out-button">Sign out</a></button>
+        </ol>
+    </nav>
+
+    <div class="content-container">
+        <aside>
+            <h1>User Page for: {{show_user.username}} </h1>
+            {% if show_user.user_type == 'staff' %}
+            <p>Permissions: Staff</p>
+            {% elif show_user.user_type == 'student' %}
+            <p>Permissions: Student</p>
+            {% endif %}
+            {% if show_user.username not in user.friends %}
+            <button onclick="sendFriendRequest()">Send friend request</button>
+            {% endif %}
+            {% if show_user.username in user.friends %}
+            <button>Friends!</button>
+            {% endif %}
+            {% if user.user_type == "staff" and user.username != show_user.username %}
+                {% if show_user.is_muted %}
+                    <button onclick="unmuteUser()">Unmute user</button>
+                {% endif %}
+                {% if not show_user.is_muted %}
+                    <button onclick="muteUser()">Mute user</button>
+                {% endif %}
+            {% endif %}
+
+            <h2> Friends: </h2>
+            {% if show_user.friends %}
+                <ul>
+                    {% for friend in show_user.friends %}
+                        <li>{{ friend }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No friends to show</p>
+            {% endif %}
+        </aside>
+        <aside>
+            <div class="bio-section">
+                <div class="bio-heading">About Me!</div>
+                {% if user.username == show_user.username %}
+                    <button onclick="toggleEditBio()">Edit bio!</button>
+                {% endif %}
+                <div class="bio-content" id="bio-content">
+                    <!-- Display the user's bio content -->
+                    {{ show_user.bio | replace('\n', '<br>') | safe }}
+                </div>
+                <form id="edit-bio-form" action="{{ url_for('update_bio') }}" method="POST" style="display: none;">
+                    <textarea id="bio-textarea" name="bio" rows="4" cols="50">{{ show_user.bio }}</textarea><br>
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+        </aside>
+    </div>
+
+
+    <script>
+        var show_user = "{{ show_user.username }}";
+        var current_user = "{{ user.username }}"
+        console.log(show_user);
+
+        document.getElementById("edit-bio-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            var formData = new FormData(this); // Get form data
+            var xhr = new XMLHttpRequest(); // Create new XMLHttpRequest object
+            xhr.open("POST", "{{ url_for('update_bio') }}", true); // Open a new POST request to your backend route
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        // If the request is successful, reload the page to reflect the changes
+                        window.location.reload();
+                    } else {
+                        // Handle error if the request fails
+                        console.error("Failed to update bio");
+                    }
+                }
+            };
+            xhr.send(formData); // Send the form data
+        });
+
+        function confirmSignOut() {
+            if (confirm("Are you sure you want to sign out?")) {
+                window.location.href = "{{ url_for('index') }}";
+            }
+            else {
+                console.log("Cancelled!");
+                return;
+            }
+        }
+
+        function toggleEditBio() {
+            var bioContent = document.getElementById("bio-content");
+            var editForm = document.getElementById("edit-bio-form");
+        
+            // Toggle between displaying the bio content and the edit form
+            if (bioContent.style.display === "none") {
+                bioContent.style.display = "block";
+                editForm.style.display = "none";
+            } else {
+                bioContent.style.display = "none";
+                editForm.style.display = "block";
+            }
+        }
+
+        function searchForUser() {
+            var userInput = document.getElementById('search-input').value;
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/user/" + userInput, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        window.location.href = "/user/" + userInput;
+                    } else {
+                        alert("User does not exist!");
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        async function sendFriendRequest() {
+            let friendName = show_user;
+            let addURL = "{{ url_for('add_friend') }}";
+            let res = await axios.post(addURL, {
+                friendName: show_user,
+                username: current_user
+            });
+            alert(res.data);
+            return;
+        }
+
+        async function muteUser() {
+            let url = "{{ url_for('mute_user') }}";
+            await axios.post(url, {
+                user_to_mute: show_user,
+                current_user: current_user
+            });
+            window.location.reload(); // Reload the page after successful request
+        }
+
+        async function unmuteUser() {
+            let url = "{{ url_for('unmute_user') }}";
+            await axios.post(url, {
+                user_to_mute: show_user,
+                current_user: current_user
+            });
+            window.location.reload(); // Reload the page after successful request
+        }
+    </script>
+{% endblock %}

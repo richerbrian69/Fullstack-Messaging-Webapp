@@ -1,0 +1,279 @@
+
+{% extends 'base.jinja' %}
+
+{% block content %} 
+    <style>
+        nav {
+            border-bottom: 1px solid black;
+            overflow: auto
+        }
+
+        body {
+            background-color: #DDF2D1;
+            font-family: Arial, sans-serif;
+        }
+
+        .flex-heading {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px; /* Adjust margin as needed */
+        }
+
+        .home-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    
+        .home-button:hover {
+            background-color: #45a049;
+        }
+    
+        .forum-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    
+        .forum-button:hover {
+            background-color: #45a049;
+        }
+        .article-list-container {
+            float: right;
+            width: 60%; 
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            max-width: 600px; /* Limit the maximum width */
+            max-height: 490px;
+        }
+
+        .article-list {
+            overflow-y: auto; /* Enable vertical scrolling */
+            float: right;
+            width: 100%; 
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            max-width: 550px; /* Limit the maximum width */
+            max-height: 390px;
+        }
+
+        .article-list h2 {
+            margin-top: 0;
+
+        }
+        .article-list ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .article-list li {
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif; /* Change font family */
+            font-size: 16px; /* Change font size */
+        }
+        
+        .article-list li a {
+            text-decoration: none; /* Remove underline from links */
+            color: #333333; /* Change link color */
+        }
+        
+        .article-list li a:hover {
+            color: #555555; /* Change link color on hover */
+        }
+        
+        .flex-container {
+            display: flex;
+        }
+        .create-article {
+            width: 40%; /* Adjust width as needed */
+            margin-right: 20px; /* Adjust margin as needed */
+        }
+
+        textarea#title {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        
+        textarea#content {
+            width: 100%;
+            height: 300px; /* Adjust height as needed */
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .refresh-button {
+            background: none;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .profile-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    
+        .profile-button:hover {
+            background-color: #45a049;
+        }
+
+    
+    </style>
+
+    <nav style="border-bottom: 1px solid black;">
+        <ol style="float: left">
+            <a href="{{ url_for('home', username=user.username) }}" class="home-button">Chat</a>
+        </ol>
+        <ol style="float: left">
+            <a href="{{ url_for('forum') }}" class="forum-button">Forum</a>
+        </ol>
+        <ol style="float: left">
+            <a href="{{ url_for('user_page', username=user.username) }}" class="profile-button">Profile</a>
+        </ol>
+        <ol style="float: right; text-align: right;"; >
+            <input type="text" id="search-input" placeholder="Search for user..." style="margin-right: 1px;">
+            <button onclick="searchForUser()" style="margin-right: 100px;">Search</button>
+            <li style="display:inline-block">Username:  {{ user.username }} </li>
+            <li style="display:block">Account type:  {{ user.user_type }} </li>
+            <button style="display:inline-block" onclick="confirmSignOut()"><a class="sign-out-button">Sign out</a></button>
+
+        </ol>
+    </nav>
+
+
+    <div class="flex-heading">
+        <div class="heading">
+            <h2>Post an article</h2>
+        </div>
+        <div class="heading" style="margin-right: 45%;"> <!-- Adjust margin-left -->
+            <h2>View an existing article</h2>
+        </div>
+    </div>
+
+    <div class="flex-container">
+        <!-- Form for creating articles -->
+        <div class="create-article">
+            <form id="create-article-form" action="{{ url_for('create_article') }}" method="POST">
+                <label for="title">Title:</label><br>
+                <textarea id="title" name="title"></textarea><br>
+                <input type="hidden" id="author" name="author" value="{{ user.username }}"><br>
+                <label for="content">Content:</label><br>
+                <textarea id="content" name="content"></textarea><br>
+                <input type="submit" value="Create Article">
+            </form>
+        </div>
+
+        <!-- Display existing articles -->
+        <div class="article-list-container">
+            <h2>Articles<button class="refresh-button">↺</button></h2>
+            <div class="article-list">
+                <ul>
+                    {% for article in articles %}
+                        <li><a href="{{ url_for('article_page', title=article.title) }}">{{ article.title }} - {{ article.author }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        var muted = "{{ user.is_muted }}";
+
+        var muted = "{{ user.is_muted }}";
+        window.onload = function() {
+            console.log(muted);
+        };
+
+        document.querySelector('.refresh-button').addEventListener('click', function() {
+            location.reload();
+        });
+        
+
+        // Add confirmation dialog before submitting form
+        document.getElementById('create-article-form').addEventListener('submit', function(event) {
+            var title = document.getElementById('title').value.trim();
+
+            if (muted=="True") {
+                alert("You do not have permission to post");
+                event.preventDefault();
+                return;
+            }
+
+            if (title === "") {
+                alert("Please enter a title for your article.");
+                event.preventDefault();
+                return;
+            }
+
+            var confirmPublish = confirm('Are you sure you want to publish this article?');
+            if (!confirmPublish) {
+                event.preventDefault(); // Prevent form submission if user clicks cancel
+            }
+        });
+
+        function confirmSignOut() {
+            if (confirm("Are you sure you want to sign out?")) {
+                window.location.href = "{{ url_for('index') }}";
+            }
+            else {
+                console.log("Cancelled!");
+                return;
+            }
+        }
+
+        function searchForUser() {
+            var userInput = document.getElementById('search-input').value;
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/user/" + userInput, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        window.location.href = "/user/" + userInput;
+                    } else {
+                        alert("User does not exist!");
+                    }
+                }
+            };
+            xhr.send();
+        }
+        
+    </script>
+
+{% endblock %}

@@ -1,0 +1,1261 @@
+<!-- 
+    Here you'll find the main exhibit: the chat application code. Feel free to look around!
+-->
+{% extends 'base.jinja' %}
+
+
+{% block content %} 
+   <style>
+
+   
+    nav {
+        border-bottom: 1px solid black;
+        overflow: auto
+    }
+
+    body {
+        background-color: #DDF2D1;
+        font-family: Arial, sans-serif;
+    }
+
+
+    .container {
+        display: flex;
+
+    }
+
+    .home-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+    }
+
+    .home-button:hover {
+        background-color: #45a049;
+    }
+
+    .forum-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+    }
+
+    .forum-button:hover {
+        background-color: #45a049;
+    }
+
+    #add_friend_button {
+        margin-left: 12%;
+    }
+
+    #message_box {
+        background-color: #ffffff;
+        border: 1px solid black; 
+        height: 400px; 
+        width: 500px; 
+        overflow: auto;
+        padding: 2px;
+        margin-left: 0px;
+    }
+    
+
+    #friends_list {
+        width: 300px;
+        padding: 10px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        background-color: #f0f0f0; /* Change background color to light gray */
+
+    }
+
+    #friends_list::-webkit-scrollbar {
+        width: 10px; /* Width of the scrollbar */
+    }
+    
+    #friends_list::-webkit-scrollbar-thumb {
+        background-color: #888; /* Color of the scrollbar thumb */
+        border-radius: 5px; /* Rounded corners of the thumb */
+    }
+    
+    #friends_list::-webkit-scrollbar-track {
+        background-color: #f1f1f1; /* Color of the scrollbar track */
+    }
+
+    #close_chatroom_button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 20px; /* Adjust size as needed */
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+    }
+
+    #create_chatroom_area {
+        position: fixed; /* Fixed positioning */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #create_chatroom_overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background */
+    }
+
+    #create_chatroom_box {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        position: fixed; /* Fixed positioning */
+        top: 20%; /* Adjust as needed */
+        left: 20%; /* Adjust as needed */
+    }
+
+    #incoming_requests_button {
+        margin-left: 47%; /* Adjust the percentage as needed */
+    }
+
+    #incoming_requests_area {
+        position: fixed; /* Fixed positioning */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    #incoming_requests_overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background */
+    }
+    
+    #incoming_requests_box {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        position: fixed; /* Fixed positioning */
+        top: 22%; /* Adjust as needed */
+        left: 65%; /* Adjust as needed */
+    }
+
+    #group_chat_area {
+        margin-left: 150px;
+        width: 300px;
+        padding: 10px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        background-color: #f0f0f0; /* Change background color to light gray */
+
+    }
+
+    #group_chat_area::-webkit-scrollbar {
+        width: 10px; /* Width of the scrollbar */
+    }
+    
+    #group_chat_area::-webkit-scrollbar-thumb {
+        background-color: #888; /* Color of the scrollbar thumb */
+        border-radius: 5px; /* Rounded corners of the thumb */
+    }
+    
+    #group_chat_area::-webkit-scrollbar-track {
+        background-color: #f1f1f1; /* Color of the scrollbar track */
+    }
+    
+    #create_chatroom_button {
+        margin-left: 150px;
+    }
+    
+    #close_incoming_button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 20px; /* Adjust size as needed */
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+    }
+
+    #add_friend_area {
+        position: fixed; /* Fixed positioning */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #add_friend_overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background */
+    }
+    
+    #add_friend_box {
+        background-color: white;
+        padding: 25px;
+        border-radius: 5px;
+        position: fixed; /* Fixed positioning */
+        top: 77%; /* Adjust as needed */
+        left: 63%; /* Adjust as needed */
+    }
+    
+    #close_button {
+        position: absolute;
+        top: 0px;
+        right: -5px;
+        font-size: 16px; /* Adjust size as needed */
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+    }
+    
+    #friend-buttons {
+        display: flex;
+    }
+    
+    #friend-buttons button {
+        margin-right: 0px; /* Adjust margin as needed */
+    }
+    
+    .text  {
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+    .highlight {
+        background-color: yellow;
+    }
+
+    .friend-info.online {
+        color: green;
+    }
+    
+    .friend-info.offline {
+        color: red;
+    }
+    .profile-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+    }
+
+    .profile-button:hover {
+        background-color: #45a049;
+    }
+    .app-title {
+        text-align: center; /* Align text to the center */
+    }
+    
+    #chat_box {
+        margin-left: 32%;
+    }
+        
+
+</style>
+
+
+<!--Navbar, you'll see the username here-->
+<nav style="border-bottom: 1px solid black;">
+    <ol style="float: left">
+        <a href="{{ url_for('home', username=user.username) }}" class="home-button">Chat</a>
+    </ol>
+    <ol style="float: left">
+        <a href="{{ url_for('forum') }}" class="forum-button">Forum</a>
+    </ol>
+    <ol style="float: left">
+        <a href="{{ url_for('user_page', username=user.username) }}" class="profile-button">Profile</a>
+    </ol>
+    <ol style="float: right; text-align: right;"; >
+        <input type="text" id="search-input" placeholder="Search for user..." style="margin-right: 1px;">
+        <button onclick="searchForUser()" style="margin-right: 100px;">Search</button>
+        <li style="display:inline-block">Username:  {{ user.username }} </li>
+        <li style="display:block">Account type:  {{ user.user_type }} </li>
+        <button style="display:inline-block" onclick="confirmSignOut()"><a class="sign-out-button">Sign out</a></button>
+
+    </ol>
+</nav>
+
+<h2 class="app-title">Messaging App</h2>
+<!-- Button to bring up incoming friend requests overlay -->
+<div style="display: flex;">
+    <aside id="create_chatroom_button">
+        <button onclick="toggleCreateChatroom()">Create Chatroom</button>
+    </aside>
+    <aside id="incoming_requests_button">
+        <button onclick="toggleIncomingRequestsArea()">View Incoming Friend Requests</button>
+    </aside>
+</div>
+<main class="container">
+    <!-- Declaration of section -->
+    <!-- Group Chat Area-->
+    <aside id="group_chat_area">
+        <h2> Your Chatrooms </h2>
+        {% if group_chats and group_chats != [''] %}
+            <ul>
+                {% for chat, members in group_chats.items() %}
+                    <li><a href="#" onclick="join_chatroom('{{ chat }}');">{{ members|join(', ') }}'s chatroom</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            No chatrooms
+        {% endif %}
+    </aside>
+
+    <section id="message_box"></section>
+
+    <!-- Friends list area-->
+    <aside id="friends_list">
+        <h2>Friends List</h2>
+        {% if friends and friends != [''] %}
+            <ul>
+                {% for friend in friends %}
+                    <div style="display: flex; justify-content: space-between; align-items: center;" class="friend-info" id="{{ friend.username }}">
+                        <li><a href="#" onclick="join_room('{{ friend.username }}');">{{ friend.username }}</a></li>
+                        <span>({{ friend.user_type }})</span>
+                        <button onclick="remove_friend('{{ friend.username }}')" style="margin-left: 5px;">✕</button>
+                    </div>
+                {% endfor %}
+            </ul>
+        {% else %}
+            No friends to display
+        {% endif %}
+    </aside>
+    
+    <!-- Incoming friend requests area (overlay box) -->
+    <aside id="incoming_requests_area" style="display: none;">
+        <div id="incoming_requests_overlay"></div> <!-- Overlay background -->
+        <div id="incoming_requests_box"> <!-- Box content -->
+            <button onclick="toggleIncomingRequestsArea()" id="close_incoming_button">✕</button> <!-- X symbol -->
+            <h2>Incoming Requests</h2>
+            {% if friend_requests and friend_requests != [''] %}
+                <ul>
+                    {% for request in friend_requests %}
+                        <li><a href="#" onclick="toggleHighlight(this); return false;" class="name">{{ request }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No incoming friend requests</p>
+            {% endif %}
+            <aside id="friend-buttons">
+                <button onclick="acceptFriendRequests()">Accept</button>
+                <button onclick="rejectFriendRequests()">Reject</button>
+            </aside>
+        </div>
+    </aside>
+
+
+
+    <aside id="create_chatroom_area" style="display: none;">
+        <div id="create_chatroom_overlay"></div> <!-- Overlay background -->
+        <div id="create_chatroom_box"> <!-- Box content -->
+            <button onclick="toggleCreateChatroom()" id="close_chatroom_button">✕</button> <!-- X symbol -->
+            <h2>Select friends to add</h2>
+            {% if friends and friends != [''] %}
+                <ul>
+                    {% for friend in friends %}
+                        <li><a href="#" onclick="toggleHighlight(this); return false;" class="name">{{ friend.username }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No friends</p>
+            {% endif %}
+            <aside id="create-button">
+                <button onclick="createChatRoom()">Create</button>
+            </aside>
+        </div>
+    </aside>
+</main>
+
+
+
+<section class='container'>
+    <!-- This section is for the buttons and input boxes beneath the message and friends area-->
+    <section id="chat_box">
+        <p class="text">Chat: </p>
+        <input id="receiver" placeholder="Message">
+        <button onclick="send()">Chat</button>
+        <button onclick="leave()">Leave Room</button>
+    </section>
+    <!-- Add New Friend button -->
+    <aside id="add_friend_button">
+        <button onclick="toggleAddFriendArea()">Add New Friend</button>
+    </aside>
+
+    <!-- Add Friend Area (overlay box) -->
+    <aside id="add_friend_area" style="display: none;">
+        <div id="add_friend_overlay"></div> <!-- Overlay background -->
+        <div id="add_friend_box"> <!-- Box content -->
+            <button onclick="toggleAddFriendArea()" id="close_button">✕</button>
+            <input id="friend" placeholder="Name">
+            <button onclick="add_friend()">Submit</button>
+        </div>
+    </aside>
+</section>
+
+
+<script src="/static/js/libs/socket.io.min.js"></script>
+<script>
+    
+    // when the user presses the "Enter" key inside of the "message box", 
+    // the message is sent to the server
+    $("#receiver").on("keyup", (e) => {
+        if (e.key == "Enter") {
+            send();
+        }
+    })
+
+    // if enter key is pressed while typing name in 
+    $("#friend").on("keyup", (e) => {
+        if (e.key == "Enter") {
+            add_friend();
+        }
+    })
+
+
+    $(document).ready(() => {
+        // Code executes when page is loaded.
+        socket.emit("login", username, (res) => {
+            updateFriendList(res);
+        });
+    })
+    //123123
+    function confirmSignOut() {
+        if (confirm("Are you sure you want to sign out?")) {
+            window.location.href = "{{ url_for('index') }}";
+        }
+        else {
+            console.log("Cancelled!");
+            return;
+        }
+    }
+
+    function updateFriendList(friendStatuses) {
+        // Update friend list based on received statuses
+        friendStatuses.forEach(function(friendStatus) {
+            const friendElement = document.getElementById(friendStatus.username);
+            if (friendElement) {
+                friendElement.classList.toggle('online', friendStatus.is_online);
+                friendElement.classList.toggle('offline', !friendStatus.is_online);
+            }
+        });
+    }
+
+    function toggleIncomingRequestsArea() {
+        var incomingRequestsArea = document.getElementById("incoming_requests_area");
+        incomingRequestsArea.style.display = incomingRequestsArea.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleCreateChatroom() {
+        var chatRoomArea = document.getElementById("create_chatroom_area");
+        chatRoomArea.style.display = chatRoomArea.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleAddFriendArea() {
+        var addFriendArea = document.getElementById("add_friend_area");
+        if (addFriendArea.style.display === "none") {
+            addFriendArea.style.display = "block"; // Show the add friend area
+        } else {
+            addFriendArea.style.display = "none"; // Hide the add friend area
+        }
+    }
+    
+    // Here's the Socket IO part of the code
+    // things get a bit complicated here so brace yourselves :P
+
+    // global variable declaration
+    let username = "{{ user.username }}";
+    let talking_to = null;
+    let current_message = null;
+
+    // Set username cookie. Remove room_id cookie -> relevant for when user relogs in.
+    Cookies.set('username', username);
+    Cookies.remove("room_id");
+
+    // initializes the socket
+    const socket = io();
+    const { subtle } = window.crypto;
+
+    socket.on("incoming_friend_request", (name) => {
+        incoming_friend_request();
+    })
+
+    socket.on("update_outgoing", (name) => {
+        outgoing_friend_request();
+        incoming_friend_request();
+        get_friends_list();
+    })
+
+    // an incoming message arrives, we'll add the message to the message box
+    socket.on("incoming", (msg, color="black") => {
+        add_message(msg, color);
+    })
+
+    socket.on('friend_status_update', (friendUsername, isOnline) => {
+        // Update friend's online status in the UI
+        const friendElement = document.getElementById(friendUsername);
+        if (friendElement) {
+            friendElement.classList.toggle('online', isOnline);
+            friendElement.classList.toggle('offline', !isOnline);
+        }
+    });
+
+    // an incoming encrypted message is received. message needs to be decrypted with private key. MAC integrity is also confirmed
+    socket.on("receive", async (friendName, message, color="black") => {
+        // Get own private key to decrypt
+        //const privateKeys = JSON.parse(localStorage.getItem(username));
+        //const privateKeyText = privateKeys.exportedPrivateKey;
+        //const privateKey = await importKey(privateKeyText, 'private');
+        // Decrypt message
+        //const decryptedMessage = await decryptMessage(encryptedMessage, privateKey);
+        // Generate hash of decrypted message (This is for digital signature)
+        //const decryptedHash = await sha256(decryptedMessage);
+        // Get friends public key for digital signature
+        //let friendsPublicKeyString = await getPublicSigKey(friendName);
+        //let friendsPublicKey = await importSigKey(friendsPublicKeyString, 'public');
+        // Verify signature received - Give senders public key, received signature and own computed hash message as arguments.
+        //let verified = await verifySignature(friendsPublicKey, encodedSignature, decryptedHash);
+        //if (verified){
+        //store_message(friendName+': ' + message);
+        add_message(friendName + ': ' + message, color);
+
+        //} else {
+	      //  store_message(friendName+': '+decryptedMessage+' (HMAC Error - Cannot verify)');
+          //  add_message(friendName + ': ' +decryptedMessage+ ' (HMAC Error - Cannot verify)', color);
+        //}
+        // Acknowledge received.
+        socket.emit("received", Cookies.get("room_id"));
+    })
+
+    //socket.on("received", () => {
+        //let message = current_message;
+        //store_message(username+': '+message);
+        //current_message = null;
+    //})
+
+    // create hash function
+    async function sha256(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    // Derive a key using PBKDF2
+    async function importPBKDF2Key() {
+        const encoder = new TextEncoder();
+        const password = Cookies.get('hash'); // Give password as a parameter
+        const passwordBuffer = encoder.encode(password);
+    
+        const pbkdf2Params = {
+            name: "PBKDF2",
+            salt: new Uint8Array('jesse'), // Salt is added -> set salt as predetermined string.
+            iterations: 10000,
+            hash: "SHA-256"
+        };
+    
+        const derivedKey = await window.crypto.subtle.importKey(
+            "raw",
+            passwordBuffer,
+            pbkdf2Params,
+            false,
+            ["deriveKey"]
+        );
+    
+        const aesKeyParams = {
+            name: "AES-GCM",
+            length: 256 
+        };
+    
+        const symmetricKey = await window.crypto.subtle.deriveKey(
+            {
+                name: "PBKDF2",
+                salt: new Uint8Array('jesse'), // salt value must retain in order for predetermined key generation
+                iterations: 10000,
+                hash: "SHA-256"
+            },
+            derivedKey,
+            aesKeyParams,
+            true, 
+            ["encrypt", "decrypt"]
+        );
+        return symmetricKey;
+    }
+    
+    // symmetric encryption. will generate key in this function
+    async function encryptStringWithPBKDF2Key(plaintext) {
+        try {
+            // Generates a key 
+            const key = await importPBKDF2Key();
+            const encoder = new TextEncoder();
+            const plaintextBuffer = encoder.encode(plaintext);
+            var iv = new Uint8Array(16);
+            iv.fill(0);
+        
+            const encryptedData = await window.crypto.subtle.encrypt(
+            {
+                name: "AES-GCM",
+                iv: iv,
+            },
+            key,
+            plaintextBuffer
+            );
+            // Convert the encrypted data to base64
+            const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
+            return encryptedBase64;
+        } catch (error) {
+            console.error("Encryption failed:", error);
+            return null;
+        }
+      }
+
+    // decrypt data using symmetric key
+    async function decryptStringWithPBKDF2Key(encryptedBase64) {
+        try {
+            // The key is created within this function. View this function to see determinstic generation.
+            const key = await importPBKDF2Key();
+            const decoder = new TextDecoder();
+
+            const encryptedUint8Array = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+    
+            var iv = new Uint8Array(16);
+            iv.fill(0); // Set IV to equal the same every time. Prevents randomness.
+    
+            const decryptedData = await window.crypto.subtle.decrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv,
+                },
+                key,
+                encryptedUint8Array
+            );
+    
+            const decryptedString = decoder.decode(decryptedData);
+            return decryptedString;
+        } catch (error) {
+            console.error("Decryption failed:", error);
+            return null;
+        }
+    }
+
+    // encrypt message using RSA public key
+    async function encryptMessage(message, publicKey) {
+        let encoder = new TextEncoder();
+        let messageBytes = encoder.encode(message);
+        // Encrypt the message
+        let encryptedData = await window.crypto.subtle.encrypt(
+            {
+                name: "RSA-OAEP",
+            },
+            publicKey,
+            messageBytes,
+        );
+        let ret = arrayBufferToBase64(encryptedData);
+        return ret;
+    }
+
+    // decrypt message using RSA private key
+    async function decryptMessage(encryptedMessage, privateKey) {
+        encryptedMessage = base64ToArrayBuffer(encryptedMessage);
+        try {
+            const decryptedBytes = await window.crypto.subtle.decrypt(
+            {
+                name: 'RSA-OAEP',
+            },
+            privateKey,
+            encryptedMessage,
+            );
+            const decoder = new TextDecoder();
+            let decryptedMessage = decoder.decode(decryptedBytes);
+            return decryptedMessage;
+        } catch (error) {
+            console.error('Error decrypting message:', error);
+            throw error;
+        }
+    }
+
+    // function to convert base64 string to array buffer
+    function base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        return bytes.buffer;
+    }
+
+    // function to convert array buffer to base64 string
+    function arrayBufferToBase64(buffer) {
+        const bytes = new Uint8Array(buffer);
+        const binaryString = new Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) {
+            binaryString[i] = String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binaryString.join(''));
+    }
+
+    // function to retrieve public key of user
+    async function getPublicKey(username) {
+        try {
+            const response = await axios.get(`/public_key/${username}`);
+            const publicKey = response.data;
+            return publicKey;
+        } catch (error) {
+            throw new Error('Error retrieving public key');
+        }
+    }
+
+    async function getPublicSigKey(username) {
+        try {
+            const response = await axios.get(`/public_sig_key/${username}`);
+            const publicKey = response.data;
+            return publicKey;
+        } catch (error) {
+            throw new Error('Error retrieving public key');
+        }
+    }
+
+    // function to import key from given 64bit string
+    async function importKey(keyBase64, keyType) {
+        const keyBytes = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
+        const importFormat = keyType === 'private' ? 'pkcs8' : 'spki';
+        const keyUsages = keyType === 'private' ? ['decrypt'] : ['encrypt'];
+        try {
+            const importedKey = await window.crypto.subtle.importKey(
+                importFormat,
+                keyBytes,
+                {
+                    name: 'RSA-OAEP',
+                    hash: 'SHA-256',
+                },
+                true,
+                keyUsages
+            );
+            return importedKey;
+        } catch (error) {
+            console.error('Error importing key:', error);
+            throw error;
+        }
+    }
+
+    async function importSigKey(keyBase64, keyType) {
+        const keyBytes = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
+        const importFormat = keyType === 'private' ? 'pkcs8' : 'spki';
+        const keyAlgorithm = { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' };
+        const keyUsages = keyType === 'private' ? ['sign'] : ['verify'];
+    
+        try {
+            const importedKey = await window.crypto.subtle.importKey(
+                importFormat,
+                keyBytes,
+                keyAlgorithm,
+                true,
+                keyUsages
+            );
+            return importedKey;
+        } catch (error) {
+            console.error('Error importing key:', error);
+            throw error;
+        }
+    }
+    
+
+    async function signMessage(privateKey, message) {
+        const signature = await window.crypto.subtle.sign(
+            {
+                name: "RSASSA-PKCS1-v1_5", // RSASSA-PKCS1-v1_5 is used for signing with RSA
+            },
+            privateKey,
+            new TextEncoder().encode(message) // Convert the message to bytes
+        );
+        return signature;
+    }
+
+    async function verifySignature(publicKey, signature, message) {
+        const signatureBytes = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
+        try {
+            // Convert the message to bytes
+            const messageBytes = new TextEncoder().encode(message);
+    
+            // Verify the signature
+            const isVerified = await window.crypto.subtle.verify(
+                {
+                    name: "RSASSA-PKCS1-v1_5",
+                    hash: { name: "SHA-256" },
+                },
+                publicKey,
+                signatureBytes,
+                messageBytes
+            );
+    
+            return isVerified;
+        } catch (error) {
+            console.error('Error verifying signature:', error);
+            throw error;
+        }
+    }
+
+    
+    // send message function. invokes RSA encryption
+    async function send() {
+        if (!Cookies.get("room_id")) {
+            return;
+        }
+
+        let message = $("#receiver").val();
+        $("#receiver").val("");
+        // Get receivers public key
+        
+        //let friendsPublicKeyString = await getPublicKey(talking_to);
+        //let friendsPublicKey = await importKey(friendsPublicKeyString, 'public');
+        try{
+            current_message = message;
+            //First add message to message box
+            add_message(username + ': ' + message, 'black');
+            // Encrypt using receivers key
+            //let encryptedMessage = await encryptMessage(message, friendsPublicKey);
+            // Hash the message
+            //let hashedMessage = await sha256(message);
+            // Get own private key for signature
+            //const privateKeys = JSON.parse(localStorage.getItem(username));
+            //const privateSigningKey = privateKeys.exportedPrivateSigningKey;
+            //const privateKey = await importSigKey(privateSigningKey, 'private');
+            // Create signature from private key and hashed message
+            //const signature = await signMessage(privateKey, hashedMessage);
+            //const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)));
+            // Message is sent along with the signature
+            socket.emit("send", username, message, Cookies.get('room_id'));
+        } catch(error) {
+            console.error(error);
+        }
+    }
+
+    async function join_chatroom(id) {
+        if (Cookies.get('room_id') != undefined) {
+            leave();
+        }
+        let box = $("#message_box");
+        $("#message_box").empty();
+        let joinPromise = new Promise((resolve, reject) => {
+            socket.emit("join_room", username, id, (res) => {
+                if (typeof res != "number") {
+                    alert(res);
+                    reject(res);
+                } else {
+                    room_id = res;
+                    Cookies.set("room_id", room_id);
+                    resolve(room_id);
+                }
+            });
+        });
+
+        try {
+            // Wait for the joinPromise to resolve before continuing
+            let room_id = await joinPromise;
+            
+            // Delay execution using setTimeout to ensure the cookie is set
+            setTimeout(async () => {
+                let url = "{{ url_for('get_message_history') }}";
+                let messageRes = await axios.post(url, {});
+                if (messageRes.data != 'None' && messageRes.data !== undefined) {
+                    for (const message of messageRes.data) {
+                        add_message(message);
+                    }
+                }
+            }, 5); // Adjust the delay time as needed
+        } catch (error) {
+            console.error("Error joining room:", error);
+        }
+    }
+
+    // we emit a join room event to the server to join a room
+    async function join_room(friend) {
+        if (Cookies.get('room_id') != undefined) {
+            leave();
+        }
+        talking_to = friend;
+        let box = $("#message_box");
+        $("#message_box").empty();
+    
+        // Promisify the socket.emit callback to ensure it finishes before proceeding
+        let joinPromise = new Promise((resolve, reject) => {
+            socket.emit("join", username, friend, (res) => {
+                if (typeof res != "number") {
+                    alert(res);
+                    reject(res);
+                } else {
+                    room_id = res;
+                    Cookies.set("room_id", room_id);
+                    resolve(room_id);
+                }
+            });
+        });
+    
+        try {
+            // Wait for the joinPromise to resolve before continuing
+            let room_id = await joinPromise;
+            
+            // Delay execution using setTimeout to ensure the cookie is set
+            setTimeout(async () => {
+                let url = "{{ url_for('get_message_history') }}";
+                let messageRes = await axios.post(url, {});
+                if (messageRes.data != 'None' && messageRes.data !== undefined) {
+                    for (const message of messageRes.data) {
+                        add_message(message);
+                    }
+                }
+            }, 5); // Adjust the delay time as needed
+        } catch (error) {
+            console.error("Error joining room:", error);
+        }
+    }
+
+    function searchForUser() {
+        var userInput = document.getElementById('search-input').value;
+        
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/user/" + userInput, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    window.location.href = "/user/" + userInput;
+                } else {
+                    alert("User does not exist!");
+                }
+            }
+        };
+        xhr.send();
+    }
+    
+    // function when the user clicks on "Leave Room"
+    // emits a "leave" event, telling the server that we want to leave the room
+    function leave() {
+        if (Cookies.get("room_id") == null) {
+            return;
+        }
+        $("#message_box").empty();
+        socket.emit("leave", username, Cookies.get("room_id"));
+        Cookies.remove("room_id");
+        talking_to = null;
+    }
+
+    // function to add a message to the message box
+    // called when an incoming message has reached a client
+    function add_message(message, color) {
+        let box = $("#message_box");
+        let child = $(`<p style="color:${color}; margin: 0px;"></p>`).text(message);
+        box.append(child);
+    }
+
+    // function to grab friend requests
+    async function incoming_friend_request() {
+        let url = "{{ url_for('get_friend_requests') }}";
+        let res = await axios.post(url, {
+            username
+        });
+        if (res.data == "Not authenticated!") {
+            return;
+        }
+        friend_requests = res.data;
+        update_friend_requests(friend_requests);
+        return;
+    }
+
+    // add friend function
+    async function add_friend() {
+        let friendName = $("#friend").val();
+        let addURL = "{{ url_for('add_friend') }}";
+        let res = await axios.post(addURL, {
+            friendName: $("#friend").val(),
+            username
+        });
+        socket.emit('add_friend', username, friendName);
+        outgoing_friend_request();
+        alert(res.data);
+        return;
+    }
+
+    async function remove_friend(friend) {
+        let confirmation = confirm("Are you sure you want to remove this friend?");
+        if (!confirmation) {
+            return; // If user cancels, do nothing
+        }
+        let friendName = friend;
+        let removeURL = "{{ url_for('remove_friend') }}";
+        let res = await axios.post(removeURL, {
+            friendName: friend,
+            username: username
+        });
+        socket.emit('removed_friend', username, friendName);
+        get_friends_list();
+        alert(res.data);
+        return;
+    }
+
+    // function to grab outgoing friend requests
+    async function outgoing_friend_request() {
+        let url = "{{ url_for('get_outgoing_friend_requests') }}";
+        let res = await axios.post(url, {
+            username
+        });
+        if (res.data == "Not authenticated!") {
+            return;
+        }
+        outgoing_friend_requests = res.data;
+        update_outgoing_friend_requests(outgoing_friend_requests);
+        return;
+    }
+
+    // function to update incoming friend requests
+    function update_friend_requests(friendRequests) {
+        const incomingRequestsArea = document.getElementById('incoming_requests_area');
+    
+        incomingRequestsArea.innerHTML = '';
+        const incomingRequestsOverlay = document.createElement('div');
+        incomingRequestsOverlay.id = 'incoming_requests_overlay';
+    
+        const incomingRequestsBox = document.createElement('div');
+        incomingRequestsBox.id = 'incoming_requests_box';
+    
+        const closeButton = document.createElement('button');
+        closeButton.id = 'close_incoming_button';
+        closeButton.textContent = '✕'; // X symbol
+        closeButton.onclick = function() {
+            toggleIncomingRequestsArea();
+        };
+        incomingRequestsBox.appendChild(closeButton);
+    
+        const header = document.createElement('h2');
+        header.textContent = 'Incoming Requests';
+        incomingRequestsBox.appendChild(header);
+    
+        if (friendRequests.length > 0 && friendRequests != '') {
+            const list = document.createElement('ul');
+            friendRequests.forEach(request => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = request;
+                link.onclick = function() {
+                    toggleHighlight(this);
+                    return false;
+                };
+                listItem.appendChild(link);
+                list.appendChild(listItem);
+            });
+            incomingRequestsBox.appendChild(list);
+        } else {
+            const message = document.createElement('p');
+            message.textContent = 'No incoming friend requests';
+            incomingRequestsBox.appendChild(message);
+        }
+    
+        // Add accept and reject buttons
+        const acceptButton = document.createElement('button');
+        acceptButton.textContent = 'Accept';
+        acceptButton.onclick = function() {
+            acceptFriendRequests();
+        };
+        incomingRequestsBox.appendChild(acceptButton);
+    
+        const rejectButton = document.createElement('button');
+        rejectButton.textContent = 'Reject';
+        rejectButton.onclick = function() {
+            rejectFriendRequests();
+        };
+        incomingRequestsBox.appendChild(rejectButton);
+        incomingRequestsArea.appendChild(incomingRequestsOverlay);
+        incomingRequestsArea.appendChild(incomingRequestsBox);
+    }
+
+    // function to update outgoing friend request
+    function update_outgoing_friend_requests(friendRequests) {
+        const outgoingRequestsList = document.getElementById('outgoing_requests');
+        outgoingRequestsList.innerHTML = '';
+
+        const header = document.createElement('h2');
+        header.textContent = 'Outgoing Requests';
+        outgoingRequestsList.appendChild(header);
+
+        if (friendRequests.length > 0 && friendRequests != '') {
+
+            const list = document.createElement('ul');
+
+            friendRequests.forEach(request => {
+                const listItem = document.createElement('li');
+                listItem.textContent = request;
+                list.appendChild(listItem);
+            });
+    
+            outgoingRequestsList.appendChild(list);
+        } else {
+            const message = document.createElement('p');
+            message.textContent = 'No outgoing friend requests';
+            outgoingRequestsList.appendChild(message);
+        }
+    }
+
+    // function to update friends list
+    function update_friends_list(friendsList) {
+        const friends = document.getElementById('friends_list');
+        friends.innerHTML = '';
+        const header = document.createElement('h2');
+        header.textContent = 'Friends List';
+        friends.appendChild(header);
+    
+        if (friendsList.length > 0 && friendsList != '') {
+            const list = document.createElement('ul');
+
+            friendsList.forEach(request => {
+                const listItem = document.createElement('li');
+                const divContainer = document.createElement('div');
+                divContainer.style.display = 'flex';
+                divContainer.style.justifyContent = 'space-between';
+                divContainer.style.alignItems = 'center';
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = request.username;
+                link.onclick = function() {
+                    join_room(request.username);
+                };
+
+                const userTypeSpan = document.createElement('span');
+                userTypeSpan.textContent = `(${request.user_type})`;
+
+                const removeButton = document.createElement('button');
+                removeButton.textContent = '✕';
+                removeButton.style.marginLeft = '5px';
+                removeButton.onclick = function() {
+                    remove_friend(request.username);
+                };
+                divContainer.appendChild(link);
+                divContainer.appendChild(userTypeSpan);
+                divContainer.appendChild(removeButton);
+                listItem.appendChild(divContainer);
+                list.appendChild(listItem);
+            });
+    
+            friends.appendChild(list);
+        } else {
+            const message = document.createElement('p');
+            message.textContent = 'No friends to display';
+            friends.appendChild(message);
+        }
+    }
+
+    // simple function to toggle text highlight
+    function toggleHighlight(element) {
+        element.classList.toggle('highlight');
+    }
+
+    async function createChatRoom() {
+        const highlightedNames = document.querySelectorAll('#create_chatroom_box .highlight');
+        const highlightedNamesList = [username];
+        
+        for (const nameElement of highlightedNames) {
+            const name = nameElement.textContent.trim();
+            highlightedNamesList.push(name);
+        }
+    
+        console.log("Highlighted Names:", highlightedNamesList);
+        let url = "{{ url_for('create_chatroom') }}";
+        let res = await axios.post(url, {
+            highlightedNamesList
+        });
+        alert("Chatroom created!");
+    }
+
+    // function to accept friend requests
+    async function acceptFriendRequests() {
+        const highlightedNames = document.querySelectorAll('#incoming_requests_box .highlight');
+
+        for (const nameElement of highlightedNames) {
+
+            const name = nameElement.textContent;
+            let url = "{{ url_for('accept_friend_requests') }}";
+            let res = await axios.post(url, {
+                friendName: name,
+                username: username
+            });
+            if (res.data == "Not authenticated!") {
+                return;
+            }
+            socket.emit('handled_request', username, name);
+        }
+        incoming_friend_request();
+        get_friends_list();
+    }
+    
+    // function to reject friend requests
+    async function rejectFriendRequests() {
+        const highlightedNames = document.querySelectorAll('#incoming_requests_box .highlight');
+        
+        for (const nameElement of highlightedNames) {
+            const name = nameElement.textContent;
+            let url = "{{ url_for('reject_friend_requests') }}";
+            let res = await axios.post(url, {
+                friendName: name,
+                username: username
+            });
+            if (res.data == "Not authenticated!") {
+                return;
+            }
+            socket.emit('handled_request', username, name);
+        }
+        incoming_friend_request();
+        get_friends_list();
+    }
+
+    // function to get friends list
+    async function get_friends_list() {
+        let url = "{{ url_for('get_friends') }}";
+        let res = await axios.post(url, {
+            username
+        });
+        friends_list = res.data;
+        update_friends_list(friends_list);
+        return;
+    }   
+
+    
+</script>
+{% endblock %}
